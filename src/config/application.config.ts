@@ -16,10 +16,10 @@ if (response.error) {
 }
 
 // Override the env vars which are processed by joi
-process.env = {
-  ...process.env,
-  ...response.value,
-};
+// process.env = {
+//   ...process.env,
+//   ...response.value,
+// };
 
 /**
  * Application config object used to determine which env vars are used by this app
@@ -27,5 +27,12 @@ process.env = {
 export const appConfig = {
   port: process.env.PORT,
 
-  jwtSecretToken: process.env.JWT_SECRET_TOKEN,
+  jwt: {
+    secretToken: process.env.JWT_SECRET_TOKEN,
+    expiresIn: process.env.JWT_EXPIRES_IN || 3600,
+  },
+
+  db: {
+    url: process.env.DATABASE_URL,
+  },
 };

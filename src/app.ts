@@ -1,6 +1,7 @@
 import { SwaggerConfig, SwaggerDocs } from "@amishfaldu/swagger-docs";
 import * as express from "express";
 import { globalExceptionFilter } from "./common/utils/global-exception-filter";
+import { MerchantController } from "./components/merchant/merchant.controller";
 
 export const app = express();
 
@@ -18,12 +19,18 @@ const swaggerConfig = new SwaggerConfig()
   .setTitle("Booking Backend")
   .setVersion("1.0.0")
   .setDescription("Booking Backend APIs")
+  .addSecurity("Jwt Token", {
+    in: "header",
+    scheme: "Basic",
+    type: "apiKey",
+    name: "authorization",
+  })
   .finalizeConfig();
 
 const swaggerDocs = new SwaggerDocs(swaggerConfig);
 
 // Add router controllers to express application
-swaggerDocs.bootstrapControllersToApp([]);
+swaggerDocs.bootstrapControllersToApp([MerchantController]);
 
 swaggerDocs.setup(app, "api-explorer");
 

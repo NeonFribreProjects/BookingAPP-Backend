@@ -1,0 +1,244 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Merchant {
+  id                 String @id @default(uuid()) @db.Uuid
+  name               String
+  languagePreference String
+
+  // Credentials
+  email    String @unique
+  password String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ShortStayProperty ShortStayProperty[]
+  LongStayProperty  LongStayProperty[]
+}
+
+enum ShortStayPropertyType {
+  Hotel
+  Apartment
+}
+
+model Review {
+  id          String   @id @default(uuid()) @db.Uuid
+  rating      Float
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ShortStayProperty   ShortStayProperty @relation(fields: [shortStayPropertyId], references: [id])
+  shortStayPropertyId String            @db.Uuid
+  LongStayProperty    LongStayProperty? @relation(fields: [longStayPropertyId], references: [id])
+  longStayPropertyId  String?           @db.Uuid
+}
+
+enum SmokingPolicy {
+  Smoking
+  NoSmoking
+}
+
+enum ShortStayPropertyBedOptions {
+  SingleBed
+  DoubleBed
+  LargeBed
+  ExtraLargeDoubleBed
+  BunkBed
+  SofaBed
+  FutonMat
+}
+
+enum ShortStayBreakfastOptions {
+  Included
+  NotIncluded
+}
+
+enum AvailableFacilities {
+  FreeWiFi
+  Restaurants
+  RoomService
+  Bar
+  TwentyFourHourFrontDesk
+  Sauna
+  FitnessCentre
+  Garden
+  Terrace
+  NonSmokingRooms
+  AirportShuttle
+  FamilyRooms
+  SpaAndWellnessCentre
+  HotTubOrJacuzzi
+  AirConditioning
+  WaterPark
+  SwimmingPool
+}
+
+enum ShortStayAmenities {
+  AirConditioning
+  Bath
+  SpaBath
+  FlatScreenTV
+  ElectricKettle
+  BalconyView
+  Terrece
+}
+
+enum ShortStayCancellation {
+  NonRefundable
+  OneDayBeforeArrival
+  TwoDaysBeforeArrival
+  CancelUntillDayOfArrival
+}
+
+enum ShortStayCancellationFine {
+  FirstNightPrice
+  FullStayPrice
+}
+
+model ShortStayProperty {
+  id           String                @id @default(uuid()) @db.Uuid
+  name         String
+  description  String
+  propertyType ShortStayPropertyType
+  starRating   Float?
+
+  // Location
+  streetAddress String
+  addressLine2  String?
+  country       String
+  city          String
+  postCode      String
+
+  // Contact details
+  contactName                   String
+  contactPhoneNumber            String
+  contactAlternativePhoneNumber String?
+
+  // Layout and details
+  roomName              String
+  customName            String
+  roomType              String
+  smokingPolicy         SmokingPolicy
+  numberOfRooms         Int
+  bedOptions            ShortStayPropertyBedOptions
+  numberOfGuestsAllowed Int
+  roomSize              Float
+  parking               Boolean
+  breakfast             ShortStayBreakfastOptions
+  languagesSpoken       String[]
+  availableFacilities   AvailableFacilities[]
+  extraBedOption        Boolean
+  amenities             ShortStayAmenities[]
+  pictures              String[]
+  checkInTime           String
+  checkOutTime          String
+  children              Boolean
+  pets                  Boolean
+  creditCard            Boolean
+  commissionPercentage  Float
+
+  // Pricing
+  pricePerPerson   Float
+  cancellation     ShortStayCancellation
+  cancellationFine ShortStayCancellationFine
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  merchant   Merchant @relation(fields: [merchantId], references: [id])
+  merchantId String   @db.Uuid
+
+  Review Review[]
+}
+
+enum LongStayPropertyType {
+  House
+  Apartment
+  Studio
+  Room
+}
+
+enum LongStayPropertyRoomType {
+  SingleRoom
+  DoubleRoom
+  Ensuite
+}
+
+enum LongStayPropertyAvailability {
+  Immediately
+  SpecificDay
+  Month
+}
+
+enum LongStayPropertyLeaseOptions {
+  MinimumSixMonths
+  SpecificNumberOfMonths
+}
+
+enum LongStayAmenities {
+  AirConditioning
+  Bath
+  SpaBath
+  FlatScreenTV
+  ElectricKettle
+  BalconyView
+  Terrece
+  Cooker
+  MicroWave
+  Fridge
+}
+
+model LongStayProperty {
+  id          String @id @default(uuid()) @db.Uuid
+  description String
+
+  // Location
+  streetAddress String
+  addressLine2  String?
+  country       String
+  city          String
+  postCode      String
+
+  // Contact details
+  contactName                   String
+  contactPhoneNumber            String
+  contactAlternativePhoneNumber String?
+
+  // Layout and details
+  propertyType        LongStayPropertyType
+  // House and apartment have atleast 1 room
+  numberOfRooms       Int
+  roomType            LongStayPropertyRoomType
+  numberOfBathrooms   Int                          @default(1)
+  availability        LongStayPropertyAvailability
+  furnished           Boolean
+  Lease               LongStayPropertyLeaseOptions
+  pictures            String[]
+  parking             Boolean
+  availableFacilities AvailableFacilities[]
+  amenities           LongStayAmenities[]
+
+  // Pricing
+  pricePerMonth    Float
+  cancellation     ShortStayCancellation
+  cancellationFine ShortStayCancellationFine
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  merchant   Merchant @relation(fields: [merchantId], references: [id])
+  merchantId String   @db.Uuid
+
+  Review Review[]
+}
