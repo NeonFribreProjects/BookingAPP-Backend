@@ -31,6 +31,7 @@ import { MerchantService } from "./merchant.service";
 import { validateLoginRequest } from "./validations/login-merchant.validation";
 import { validateRegisterRequest } from "./validations/register-merchant.validation";
 import { validateUpdateMerchantRequest } from "./validations/update-merchant.validation";
+import { AddShortStayPropertyDto } from "./dto/add-short-stay-property.dto";
 
 @Controller({ route: "merchant" })
 @RouteTag("Merchant")
@@ -111,5 +112,35 @@ export class MerchantController {
       merchantDetails
     );
     return loginResult;
+  }
+
+  @Post("short-stay-property")
+  @RouteRequestBody(AddShortStayPropertyDto)
+  @RouteMiddleware([
+    authMiddleware,
+    (req, res, next) => {
+      return validationMiddleware(
+        req,
+        res,
+        next,
+        validateUpdateMerchantRequest
+      );
+    },
+  ])
+  @RouteResponseBody(AddShortStayPropertyDto)
+  @RouteSecurity([{ "Jwt Token": [] }])
+  async addShortStayProperty(
+    @Request() request: Express.Request & { id: string },
+    @Body() shortStayPropertyDetails: AddShortStayPropertyDto
+  ): Promise<AddShortStayPropertyDto> {
+    if (!isUUID(request.id)) {
+      throw new CustomHttpException(400, "Invalid merchant id");
+    }
+
+    const property = await this.merchantService.addShortStayProperty(
+      request.id,
+      shortStayPropertyDetails
+    );
+    return property;
   }
 }
