@@ -13,3 +13,8 @@ export class RegisterMerchantDto {
   @IsString()
   password: string;
 }
+
+export class RegisterMerchantResponseDto {
+  @IsString()
+  token: string;
+}

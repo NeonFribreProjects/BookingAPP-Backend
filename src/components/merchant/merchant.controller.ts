@@ -1,23 +1,36 @@
 import {
   Body,
   Controller,
-  Get,
   Patch,
   Post,
   Request,
   RouteMiddleware,
   RouteRequestBody,
+  RouteResponseBody,
   RouteSecurity,
   RouteTag,
 } from "@amishfaldu/swagger-docs";
-import { Merchant } from "@prisma/client";
 import { isUUID } from "class-validator";
 import * as joi from "joi";
 import { authMiddleware } from "../../common/middlewares/auth.middleware";
+import { validationMiddleware } from "../../common/middlewares/validator.middleware";
 import { CustomHttpException } from "../../common/utils/custom-http-error";
-import { LoginMerchantDto } from "./dto/login-merchant.dto";
-import { RegisterMerchantDto } from "./dto/register-merchant.dto";
+import {
+  LoginMerchantDto,
+  LoginMerchantResponseDto,
+} from "./dto/login-merchant.dto";
+import {
+  RegisterMerchantDto,
+  RegisterMerchantResponseDto,
+} from "./dto/register-merchant.dto";
+import {
+  UpdateMerchantDto,
+  UpdateMerchantResponseDto,
+} from "./dto/update-merchant.dto";
 import { MerchantService } from "./merchant.service";
+import { validateLoginRequest } from "./validations/login-merchant.validation";
+import { validateRegisterRequest } from "./validations/register-merchant.validation";
+import { validateUpdateMerchantRequest } from "./validations/update-merchant.validation";
 
 @Controller({ route: "merchant" })
 @RouteTag("Merchant")
@@ -28,18 +41,15 @@ export class MerchantController {
   }
 
   @Post()
+  @RouteMiddleware([
+    (req, res, next) => {
+      return validationMiddleware(req, res, next, validateRegisterRequest);
+    },
+  ])
+  @RouteResponseBody(LoginMerchantResponseDto)
   async registerMerchant(
     @Body() registerDetails: RegisterMerchantDto
-  ): Promise<{ token: string }> {
-    if (
-      joi.string().email().validate(registerDetails?.email).error ||
-      joi.string().min(1).validate(registerDetails?.name).error ||
-      joi.string().min(1).validate(registerDetails?.languagePreference).error ||
-      joi.string().min(6).validate(registerDetails?.password).error
-    ) {
-      throw new CustomHttpException(400, "Invalid merchant details");
-    }
-
+  ): Promise<RegisterMerchantResponseDto> {
     const registerResult = await this.merchantService.registerMerchant(
       registerDetails.email,
       registerDetails.name,
@@ -50,9 +60,15 @@ export class MerchantController {
   }
 
   @Post("login")
+  @RouteMiddleware([
+    (req, res, next) => {
+      return validationMiddleware(req, res, next, validateLoginRequest);
+    },
+  ])
+  @RouteResponseBody(LoginMerchantResponseDto)
   async loginMerchant(
     @Body() loginDetails: LoginMerchantDto
-  ): Promise<{ token: string }> {
+  ): Promise<LoginMerchantResponseDto> {
     if (
       joi.string().email().validate(loginDetails?.email).error ||
       joi.string().min(6).validate(loginDetails?.password).error
@@ -68,13 +84,24 @@ export class MerchantController {
   }
 
   @Patch()
-  @RouteRequestBody(RegisterMerchantDto, { required: false })
-  @RouteMiddleware([authMiddleware])
+  @RouteRequestBody(UpdateMerchantDto, { required: false })
+  @RouteMiddleware([
+    authMiddleware,
+    (req, res, next) => {
+      return validationMiddleware(
+        req,
+        res,
+        next,
+        validateUpdateMerchantRequest
+      );
+    },
+  ])
+  @RouteResponseBody(UpdateMerchantResponseDto)
   @RouteSecurity([{ "Jwt Token": [] }])
   async updateMerchant(
     @Request() request: Express.Request & { id: string },
-    @Body() merchantDetails: Partial<RegisterMerchantDto>
-  ): Promise<Merchant> {
+    @Body() merchantDetails: Partial<UpdateMerchantDto>
+  ): Promise<UpdateMerchantResponseDto> {
     if (!isUUID(request.id)) {
       throw new CustomHttpException(400, "Invalid merchant id");
     }

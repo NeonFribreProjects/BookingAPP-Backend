@@ -9,7 +9,9 @@ export const globalExceptionFilter = (
 ) => {
   console.error(`global-exception-filter : globalExceptionFilter : `, error);
   if (error?.constructor === CustomHttpException && !res.headersSent) {
-    return res.status(error.statuscode).send({ message: error.message });
+    return res
+      .status(error.statuscode)
+      .send({ message: error.message, ...(error.extraData || {}) });
   } else if (!res.headersSent) {
     return res.status(500).send({ message: "Something went wrong" });
   }

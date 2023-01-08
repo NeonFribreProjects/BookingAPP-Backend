@@ -7,3 +7,8 @@ export class LoginMerchantDto {
   @IsString()
   password: string;
 }
+
+export class LoginMerchantResponseDto {
+  @IsString()
+  token: string;
+}
