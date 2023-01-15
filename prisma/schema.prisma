@@ -150,6 +150,7 @@ model ShortStayProperty {
 
   // Pricing
   pricePerPerson   Float
+  discountedPrice  Float
   cancellation     ShortStayCancellation
   cancellationFine ShortStayCancellationFine
 
@@ -231,6 +232,7 @@ model LongStayProperty {
 
   // Pricing
   pricePerMonth    Float
+  discountedPrice  Float
   cancellation     ShortStayCancellation
   cancellationFine ShortStayCancellationFine
 
@@ -240,5 +242,65 @@ model LongStayProperty {
   merchant   Merchant @relation(fields: [merchantId], references: [id])
   merchantId String   @db.Uuid
 
-  Review Review[]
+  Review      Review[]
+  SponsoredAd SponsoredAd[]
+}
+
+model InterstitialAd {
+  id               String   @id @default(uuid()) @db.Uuid
+  title            String
+  description      String
+  image            String
+  link             String
+  startDate        DateTime
+  endDate          DateTime
+  targetLocation   String
+  targetSegment    String
+  displayFrequency Int
+  views            Int
+  clicks           Int
+  conversions      Int
+}
+
+enum SponsoredAdTargetedKeywords {
+  description
+  country
+  city
+  postcode
+  numberOfRooms
+  roomType
+  numberOfBathrooms
+  availability
+  furnished
+  lease
+  parking
+  availableFacilities
+  amenities
+  price
+  cancellation
+  cancellationFine
+}
+
+enum SponsoredAdGrade {
+  A
+  B
+  C
+  D
+  E
+  F
+}
+
+model SponsoredAd {
+  id             String                        @id @default(uuid()) @db.Uuid
+  startDate      DateTime
+  endDate        DateTime
+  targetLocation String
+  targetKeywords SponsoredAdTargetedKeywords[]
+  grade          SponsoredAdGrade
+  views          Int
+  clicks         Int
+  conversions    Int
+
+  longStayProperty   LongStayProperty @relation(fields: [longStayPropertyId], references: [id])
+  longStayPropertyId String           @db.Uuid
 }
