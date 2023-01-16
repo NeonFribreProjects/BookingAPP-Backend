@@ -150,7 +150,7 @@ model ShortStayProperty {
 
   // Pricing
   pricePerPerson   Float
-  discountedPrice  Float
+  discountedPrice  Float?
   cancellation     ShortStayCancellation
   cancellationFine ShortStayCancellationFine
 
@@ -224,7 +224,7 @@ model LongStayProperty {
   numberOfBathrooms   Int                          @default(1)
   availability        LongStayPropertyAvailability
   furnished           Boolean
-  Lease               LongStayPropertyLeaseOptions
+  lease               LongStayPropertyLeaseOptions
   pictures            String[]
   parking             Boolean
   availableFacilities AvailableFacilities[]
@@ -232,7 +232,7 @@ model LongStayProperty {
 
   // Pricing
   pricePerMonth    Float
-  discountedPrice  Float
+  discountedPrice  Float?
   cancellation     ShortStayCancellation
   cancellationFine ShortStayCancellationFine
 
@@ -260,6 +260,8 @@ model InterstitialAd {
   views            Int
   clicks           Int
   conversions      Int
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 enum SponsoredAdTargetedKeywords {
@@ -276,7 +278,7 @@ enum SponsoredAdTargetedKeywords {
   parking
   availableFacilities
   amenities
-  price
+  discountedPrice
   cancellation
   cancellationFine
 }
@@ -300,7 +302,49 @@ model SponsoredAd {
   views          Int
   clicks         Int
   conversions    Int
+  createdAt      DateTime                      @default(now())
+  updatedAt      DateTime                      @updatedAt
 
   longStayProperty   LongStayProperty @relation(fields: [longStayPropertyId], references: [id])
   longStayPropertyId String           @db.Uuid
 }
+
+enum Gender {
+  Male
+  Female
+  Other
+}
+
+enum SmokingPreference {
+  None
+  NonSmoking
+  Smoking
+}
+
+model User {
+  id                  String            @id @default(uuid()) @db.Uuid
+  firstName           String
+  lastName            String
+  email               String
+  mobileNumber        String
+  dob                 DateTime?
+  gender              Gender?
+  smokingPreference   SmokingPreference @default(None)
+  address             String?
+  creditCard          String
+  lastSearchedCity    String?
+  lastSearchedCountry String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  // Booking           Booking[]
+}
+
+// model Booking {
+//   id String @id @default(uuid()) @db.Uuid
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   user   User   @relation(fields: [userId], references: [id])
+//   userId String @db.Uuid
+// }

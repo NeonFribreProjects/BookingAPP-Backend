@@ -1,37 +1,31 @@
-import { plainToInstance } from "class-transformer";
 import {
-  IsEmail,
-  IsOptional,
+  IsNumber,
+  IsObject,
   IsString,
   isUUID,
   validate,
 } from "class-validator";
 import { Request } from "express";
 import { CustomHttpException } from "../../../common/utils/custom-http-error";
+import { plainToInstance } from "class-transformer";
+import { SponsoredAdTargetedKeywords } from "@prisma/client";
 
-class UpdateMerchantDtoValidation {
-  @IsEmail()
-  @IsOptional()
-  email: string;
+class GetSponsoredAdsRequest {
+  @IsNumber()
+  skip: number;
 
-  @IsString()
-  @IsOptional()
-  name: string;
+  @IsNumber()
+  limit: number;
 
-  @IsString()
-  @IsOptional()
-  languagePreference: string;
-
-  @IsString()
-  @IsOptional()
-  password: string;
+  @IsObject()
+  keywords: Map<SponsoredAdTargetedKeywords, any>;
 }
 
-export async function validateUpdateMerchantRequest(
+export async function validateGetSponsoredAdsRequest(
   req: Request & { id?: string }
 ) {
   if (!isUUID(req?.id)) {
-    throw new CustomHttpException(400, "Invalid merchant id");
+    throw new CustomHttpException(400, "Invalid user id");
   }
 
   const body = req.body;
@@ -39,8 +33,8 @@ export async function validateUpdateMerchantRequest(
     throw new CustomHttpException(400, "Invalid data");
   }
 
-  const registerBody = plainToInstance(UpdateMerchantDtoValidation, body);
-  const errors = await validate(registerBody, { forbidNonWhitelisted: true });
+  const adsBody = plainToInstance(GetSponsoredAdsRequest, req.query);
+  const errors = await validate(adsBody, { forbidNonWhitelisted: true });
 
   const errorMessages = {};
   errors.forEach((error) => {

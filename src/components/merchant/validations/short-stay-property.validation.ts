@@ -1,11 +1,4 @@
 import {
-  IsArray,
-  IsBoolean,
-  IsEnum,
-  IsNumber,
-  IsString,
-} from "@amishfaldu/swagger-docs";
-import {
   AvailableFacilities,
   ShortStayAmenities,
   ShortStayBreakfastOptions,
@@ -15,8 +8,21 @@ import {
   ShortStayPropertyType,
   SmokingPolicy,
 } from "@prisma/client";
+import { plainToInstance } from "class-transformer";
+import {
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  isUUID,
+  validate,
+} from "class-validator";
+import { Request } from "express";
+import { CustomHttpException } from "../../../common/utils/custom-http-error";
 
-export class AddShortStayPropertyDto {
+class ShortStayPropertyDtoValidation {
   @IsString()
   name: string;
 
@@ -27,12 +33,14 @@ export class AddShortStayPropertyDto {
   propertyType: ShortStayPropertyType;
 
   @IsNumber()
+  @IsOptional()
   starRating: number | null;
 
   @IsString()
   streetAddress: string;
 
   @IsString()
+  @IsOptional()
   addressLine2: string | null;
 
   @IsString()
@@ -51,6 +59,7 @@ export class AddShortStayPropertyDto {
   contactPhoneNumber: string;
 
   @IsString()
+  @IsOptional()
   contactAlternativePhoneNumber: string | null;
 
   @IsString()
@@ -83,19 +92,23 @@ export class AddShortStayPropertyDto {
   @IsEnum(ShortStayBreakfastOptions)
   breakfast: ShortStayBreakfastOptions;
 
-  @IsArray("String")
+  @IsArray()
+  @IsString({ each: true })
   languagesSpoken: string[];
 
-  @IsArray("String", { isItemEnum: true })
+  @IsArray()
+  @IsEnum(AvailableFacilities, { each: true })
   availableFacilities: AvailableFacilities[];
 
   @IsBoolean()
   extraBedOption: boolean;
 
-  @IsArray("String", { isItemEnum: true })
+  @IsArray()
+  @IsEnum(ShortStayAmenities, { each: true })
   amenities: ShortStayAmenities[];
 
-  @IsArray("String")
+  @IsArray()
+  @IsString({ each: true })
   pictures: string[];
 
   @IsString()
@@ -126,16 +139,27 @@ export class AddShortStayPropertyDto {
   cancellationFine: ShortStayCancellationFine;
 }
 
-export class AddShortStayPropertyResponseDto extends AddShortStayPropertyDto {
-  @IsString()
-  id: string;
+export async function validateAddShortStayPropertyRequest(
+  req: Request & { id?: string }
+) {
+  if (!isUUID(req?.id)) {
+    throw new CustomHttpException(400, "Invalid merchant id");
+  }
 
-  @IsString()
-  createdAt: Date;
+  const body = req.body;
+  if (!body) {
+    throw new CustomHttpException(400, "Invalid data");
+  }
 
-  @IsString()
-  updatedAt: Date;
+  const propertyBody = plainToInstance(ShortStayPropertyDtoValidation, body);
+  const errors = await validate(propertyBody, { forbidNonWhitelisted: true });
 
-  @IsString()
-  merchantId: string;
+  const errorMessages = {};
+  errors.forEach((error) => {
+    errorMessages[error.property] = Object.values(error.constraints);
+  });
+
+  if (errors.length > 0) {
+    throw new CustomHttpException(400, "Invalid data", errorMessages);
+  }
 }

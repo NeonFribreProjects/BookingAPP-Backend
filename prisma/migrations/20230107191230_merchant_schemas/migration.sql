@@ -127,7 +127,7 @@ CREATE TABLE "LongStayProperty" (
     "numberOfBathrooms" INTEGER NOT NULL DEFAULT 1,
     "availability" "LongStayPropertyAvailability" NOT NULL,
     "furnished" BOOLEAN NOT NULL,
-    "Lease" "LongStayPropertyLeaseOptions" NOT NULL,
+    "lease" "LongStayPropertyLeaseOptions" NOT NULL,
     "pictures" TEXT[],
     "parking" BOOLEAN NOT NULL,
     "availableFacilities" "AvailableFacilities"[],

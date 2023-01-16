@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Get,
   Patch,
   Post,
+  QueryParam,
   Request,
   RouteMiddleware,
   RouteRequestBody,
@@ -10,11 +12,16 @@ import {
   RouteSecurity,
   RouteTag,
 } from "@amishfaldu/swagger-docs";
-import { isUUID } from "class-validator";
-import * as joi from "joi";
 import { authMiddleware } from "../../common/middlewares/auth.middleware";
 import { validationMiddleware } from "../../common/middlewares/validator.middleware";
-import { CustomHttpException } from "../../common/utils/custom-http-error";
+import {
+  AddLongStayPropertyDto,
+  AddLongStayPropertyResponseDto,
+} from "./dto/add-long-stay-property.dto";
+import {
+  AddShortStayPropertyDto,
+  AddShortStayPropertyResponseDto,
+} from "./dto/add-short-stay-property.dto";
 import {
   LoginMerchantDto,
   LoginMerchantResponseDto,
@@ -28,10 +35,12 @@ import {
   UpdateMerchantResponseDto,
 } from "./dto/update-merchant.dto";
 import { MerchantService } from "./merchant.service";
+import { validateGetPropertyRequest } from "./validations/get-property.validation";
 import { validateLoginRequest } from "./validations/login-merchant.validation";
+import { validateAddLongStayPropertyRequest } from "./validations/long-stay-property.validation";
 import { validateRegisterRequest } from "./validations/register-merchant.validation";
+import { validateAddShortStayPropertyRequest } from "./validations/short-stay-property.validation";
 import { validateUpdateMerchantRequest } from "./validations/update-merchant.validation";
-import { AddShortStayPropertyDto } from "./dto/add-short-stay-property.dto";
 
 @Controller({ route: "merchant" })
 @RouteTag("Merchant")
@@ -40,7 +49,6 @@ export class MerchantController {
   constructor() {
     this.merchantService = new MerchantService();
   }
-
   @Post()
   @RouteMiddleware([
     (req, res, next) => {
@@ -59,7 +67,6 @@ export class MerchantController {
     );
     return registerResult;
   }
-
   @Post("login")
   @RouteMiddleware([
     (req, res, next) => {
@@ -70,13 +77,6 @@ export class MerchantController {
   async loginMerchant(
     @Body() loginDetails: LoginMerchantDto
   ): Promise<LoginMerchantResponseDto> {
-    if (
-      joi.string().email().validate(loginDetails?.email).error ||
-      joi.string().min(6).validate(loginDetails?.password).error
-    ) {
-      throw new CustomHttpException(400, "Invalid email or password");
-    }
-
     const loginResult = await this.merchantService.loginMerchant(
       loginDetails.email,
       loginDetails.password
@@ -85,7 +85,6 @@ export class MerchantController {
   }
 
   @Patch()
-  @RouteRequestBody(UpdateMerchantDto, { required: false })
   @RouteMiddleware([
     authMiddleware,
     (req, res, next) => {
@@ -97,16 +96,13 @@ export class MerchantController {
       );
     },
   ])
+  @RouteRequestBody(UpdateMerchantDto, { required: false })
   @RouteResponseBody(UpdateMerchantResponseDto)
   @RouteSecurity([{ "Jwt Token": [] }])
   async updateMerchant(
     @Request() request: Express.Request & { id: string },
     @Body() merchantDetails: Partial<UpdateMerchantDto>
   ): Promise<UpdateMerchantResponseDto> {
-    if (!isUUID(request.id)) {
-      throw new CustomHttpException(400, "Invalid merchant id");
-    }
-
     const loginResult = await this.merchantService.updateMerchant(
       request.id,
       merchantDetails
@@ -115,7 +111,6 @@ export class MerchantController {
   }
 
   @Post("short-stay-property")
-  @RouteRequestBody(AddShortStayPropertyDto)
   @RouteMiddleware([
     authMiddleware,
     (req, res, next) => {
@@ -123,24 +118,85 @@ export class MerchantController {
         req,
         res,
         next,
-        validateUpdateMerchantRequest
+        validateAddShortStayPropertyRequest
       );
     },
   ])
-  @RouteResponseBody(AddShortStayPropertyDto)
+  @RouteRequestBody(AddShortStayPropertyDto)
+  @RouteResponseBody(AddShortStayPropertyResponseDto)
   @RouteSecurity([{ "Jwt Token": [] }])
   async addShortStayProperty(
     @Request() request: Express.Request & { id: string },
     @Body() shortStayPropertyDetails: AddShortStayPropertyDto
-  ): Promise<AddShortStayPropertyDto> {
-    if (!isUUID(request.id)) {
-      throw new CustomHttpException(400, "Invalid merchant id");
-    }
-
+  ): Promise<AddShortStayPropertyResponseDto> {
     const property = await this.merchantService.addShortStayProperty(
       request.id,
       shortStayPropertyDetails
     );
     return property;
   }
+
+  @Post("long-stay-property")
+  @RouteMiddleware([
+    authMiddleware,
+    (req, res, next) => {
+      return validationMiddleware(
+        req,
+        res,
+        next,
+        validateAddLongStayPropertyRequest
+      );
+    },
+  ])
+  @RouteRequestBody(AddLongStayPropertyDto)
+  @RouteResponseBody(AddLongStayPropertyResponseDto)
+  @RouteSecurity([{ "Jwt Token": [] }])
+  async addLongStayProperty(
+    @Request() request: Express.Request & { id: string },
+    @Body() longStayPropertyDetails: AddLongStayPropertyDto
+  ): Promise<AddLongStayPropertyResponseDto> {
+    const property = await this.merchantService.addLongStayProperty(
+      request.id,
+      longStayPropertyDetails
+    );
+    return property;
+  }
+
+  @Get("property")
+  @RouteMiddleware([
+    authMiddleware,
+    (req, res, next) => {
+      return validationMiddleware(req, res, next, validateGetPropertyRequest);
+    },
+  ])
+  @RouteResponseBody(AddLongStayPropertyDto || AddShortStayPropertyDto, {
+    isArray: true,
+  })
+  @RouteSecurity([{ "Jwt Token": [] }])
+  async getProperty(
+    @Request() request: Express.Request & { id: string },
+    @QueryParam("propertyType") propertyType: "ShortStay" | "LongStay"
+  ): Promise<AddLongStayPropertyDto[] | AddShortStayPropertyDto[]> {
+    const property = await this.merchantService.getProperty(
+      request.id,
+      propertyType
+    );
+    return property;
+  }
+
+  // @Get("booking")
+  // @RouteResponseBody(BookingDto, {
+  //   isArray: true,
+  // })
+  // @RouteSecurity([{ "Jwt Token": [] }])
+  // async getBookings(
+  //   @Request() request: Express.Request & { id: string }
+  // ): Promise<Booking[]> {
+  //   if (!isUUID(request.id)) {
+  //     throw new CustomHttpException(400, "Invalid merchant id");
+  //   }
+
+  //   const bookings = await this.merchantService.getBookings(request.id);
+  //   return bookings;
+  // }
 }
