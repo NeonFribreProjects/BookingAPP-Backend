@@ -18,6 +18,9 @@ import {
 
 export class AddLongStayPropertyDto {
   @IsString()
+  name: string;
+
+  @IsString()
   description: string;
 
   @IsString()

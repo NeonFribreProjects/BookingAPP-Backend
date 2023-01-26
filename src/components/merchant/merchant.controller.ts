@@ -49,6 +49,7 @@ export class MerchantController {
   constructor() {
     this.merchantService = new MerchantService();
   }
+
   @Post()
   @RouteMiddleware([
     (req, res, next) => {
@@ -67,6 +68,7 @@ export class MerchantController {
     );
     return registerResult;
   }
+
   @Post("login")
   @RouteMiddleware([
     (req, res, next) => {

@@ -49,10 +49,6 @@ export class RegisterUserDtoValidation {
   @IsString()
   @IsOptional()
   address?: string;
-
-  @IsString()
-  @IsOptional()
-  creditCard?: string;
 }
 
 export async function validateRegisterRequest(req: Request) {

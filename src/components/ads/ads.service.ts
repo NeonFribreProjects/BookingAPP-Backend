@@ -54,9 +54,9 @@ export class AdsService {
   }
 
   /**
-   * Fetch interstitial ads
-   * @param city - city for which to fetch interstitial ads
-   * @param country - country for which to fetch interstitial ads
+   * Fetch sponsored ads
+   * @param keywords - keywords with values that should be used to target ads
+   * @param paginationParams - pagination parameters
    * @returns interstitial ads
    */
   async fetchSponsoredAds(
@@ -76,6 +76,7 @@ export class AdsService {
           hasSome: Object.keys(keywords) as any[],
         },
       },
+      orderBy: { grade: "asc" },
       take: paginationParams.limit,
       skip: paginationParams.skip,
     });
@@ -87,10 +88,11 @@ export class AdsService {
             id: sponsoredAd.id,
             longStayProperty: sponsoredAd.targetKeywords.reduce(
               (properties, keyword) => {
-                properties[keyword] = keywords[keyword];
+                properties.OR.push({ [keyword]: keywords[keyword] });
+                properties.OR.push({ [keyword]: { hasSome: keywords[keyword] } });
                 return properties;
               },
-              {}
+              { OR: [] }
             ),
           },
           include: {

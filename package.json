@@ -32,7 +32,8 @@
     "joi": "~17.7.0",
     "jsonwebtoken": "~9.0.0",
     "reflect-metadata": "~0.1.13",
-    "rimraf": "~3.0.2"
+    "rimraf": "~3.0.2",
+    "stripe": "~11.7.0"
   },
   "devDependencies": {
     "@types/bcrypt": "~5.0.0",

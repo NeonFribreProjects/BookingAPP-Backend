@@ -24,6 +24,7 @@ model Merchant {
 
   shortStayProperty ShortStayProperty[]
   longStayProperty  LongStayProperty[]
+  booking           Booking[]
 }
 
 enum ShortStayPropertyType {
@@ -149,7 +150,7 @@ model ShortStayProperty {
   commissionPercentage  Float
 
   // Pricing
-  pricePerPerson   Float
+  pricePerMonth    Float
   discountedPrice  Float?
   cancellation     ShortStayCancellation
   cancellationFine ShortStayCancellationFine
@@ -160,8 +161,9 @@ model ShortStayProperty {
   merchant   Merchant @relation(fields: [merchantId], references: [id])
   merchantId String   @db.Uuid
 
-  reviewScore Float    @default(0)
+  reviewScore Float     @default(0)
   review      Review[]
+  booking     Booking[]
 }
 
 enum LongStayPropertyType {
@@ -203,6 +205,7 @@ enum LongStayAmenities {
 
 model LongStayProperty {
   id          String @id @default(uuid()) @db.Uuid
+  name        String
   description String
 
   // Location
@@ -246,6 +249,7 @@ model LongStayProperty {
   reviewScore Float         @default(0)
   review      Review[]
   sponsoredAd SponsoredAd[]
+  booking     Booking[]
 }
 
 model InterstitialAd {
@@ -334,20 +338,40 @@ model User {
   gender              Gender?
   smokingPreference   SmokingPreference @default(None)
   address             String?
-  creditCard          String
   lastSearchedCity    String?
   lastSearchedCountry String?
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
-  // Booking           Booking[]
+  booking             Booking[]
 }
 
-// model Booking {
-//   id String @id @default(uuid()) @db.Uuid
+enum BookingStatus {
+  INPROGRESS
+  COMPLETED
+  CANCELLED
+}
 
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
+model Booking {
+  id                          String        @id @default(uuid()) @db.Uuid
+  stayStartDate               DateTime
+  stayEndDate                 DateTime
+  pricePerMonth               Float
+  totalPrice                  Float
+  status                      BookingStatus @default(INPROGRESS)
+  stripeCheckoutSessionId     String?
+  stripeCheckoutPaymentIntent String?
+  createdAt                   DateTime      @default(now())
+  updatedAt                   DateTime      @updatedAt
 
-//   user   User   @relation(fields: [userId], references: [id])
-//   userId String @db.Uuid
-// }
+  longStayProperty   LongStayProperty? @relation(fields: [longStayPropertyId], references: [id])
+  longStayPropertyId String?           @db.Uuid
+
+  shortStayProperty   ShortStayProperty? @relation(fields: [shortStayPropertyId], references: [id])
+  shortStayPropertyId String?            @db.Uuid
+
+  merchant   Merchant @relation(fields: [merchantId], references: [id])
+  merchantId String   @db.Uuid
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @db.Uuid
+}

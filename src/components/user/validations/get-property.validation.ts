@@ -1,12 +1,15 @@
 import { ShortStayPropertyBedOptions } from "@prisma/client";
+import { plainToInstance } from "class-transformer";
 import {
   IsBoolean,
   IsDateString,
   IsEnum,
   IsNumber,
+  IsNumberString,
   IsOptional,
   IsString,
   isUUID,
+  validate,
 } from "class-validator";
 import { Request } from "express";
 import { CustomHttpException } from "../../../common/utils/custom-http-error";
@@ -17,6 +20,12 @@ export enum PropertyType {
 }
 
 class GetPropertyValidation {
+  @IsNumberString()
+  skip: string;
+
+  @IsNumberString()
+  limit: string;
+
   @IsEnum(PropertyType)
   @IsOptional()
   propertyType: PropertyType;
@@ -85,5 +94,20 @@ export async function validateGetPropertyRequest(
 ) {
   if (!isUUID(req.id)) {
     throw new CustomHttpException(400, "Invalid user id");
+  }
+
+  const query = req.query;
+  const registerBody = plainToInstance(GetPropertyValidation, query);
+  const errors = await validate(registerBody, {
+    forbidNonWhitelisted: true,
+  });
+
+  const errorMessages = {};
+  errors.forEach((error) => {
+    errorMessages[error.property] = Object.values(error.constraints);
+  });
+
+  if (errors.length > 0) {
+    throw new CustomHttpException(400, "Invalid data", errorMessages);
   }
 }
