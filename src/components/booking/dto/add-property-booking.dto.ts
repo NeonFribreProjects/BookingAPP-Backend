@@ -1,4 +1,4 @@
-import { IsEnum, IsNumber, IsString } from "@amishfaldu/swagger-docs";
+import { IsEnum, IsString } from "@amishfaldu/swagger-docs";
 import { PropertyType } from "../../../components/user/validations/get-property.validation";
 
 export class AddPropertyBookingDto {

@@ -1,7 +1,10 @@
 import { SwaggerConfig, SwaggerDocs } from "@amishfaldu/swagger-docs";
-import * as express from "express";
+import express from "express";
 import { globalExceptionFilter } from "./common/utils/global-exception-filter";
+import { AdsController } from "./components/ads/ads.controller";
+import { BookingController } from "./components/booking/booking.controller";
 import { MerchantController } from "./components/merchant/merchant.controller";
+import { UserController } from "./components/user/user.controller";
 
 export const app = express();
 
@@ -30,7 +33,12 @@ const swaggerConfig = new SwaggerConfig()
 const swaggerDocs = new SwaggerDocs(swaggerConfig);
 
 // Add router controllers to express application
-swaggerDocs.bootstrapControllersToApp([MerchantController]);
+swaggerDocs.bootstrapControllersToApp([
+  AdsController,
+  BookingController,
+  MerchantController,
+  UserController,
+]);
 
 swaggerDocs.setup(app, "api-explorer");
 

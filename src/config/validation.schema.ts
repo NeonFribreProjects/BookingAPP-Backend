@@ -11,5 +11,4 @@ export const validationSchema = joi.object({
 
   STRIPE_API_KEY: joi.string().required(),
   STRIPE_SUCCESS_URL: joi.string().required(),
-  STRIPE_CANCEL_URL: joi.string().required(),
 });

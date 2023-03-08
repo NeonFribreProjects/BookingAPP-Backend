@@ -12,8 +12,11 @@ import {
   RouteSecurity,
   RouteTag,
 } from "@amishfaldu/swagger-docs";
+import { isUUID } from "class-validator";
 import { authMiddleware } from "../../common/middlewares/auth.middleware";
 import { validationMiddleware } from "../../common/middlewares/validator.middleware";
+import { CustomHttpException } from "../../common/utils/custom-http-error";
+import { GetUserBookingsDto } from "../booking/dto/get-user-booking.dto";
 import {
   AddLongStayPropertyDto,
   AddLongStayPropertyResponseDto,
@@ -186,19 +189,19 @@ export class MerchantController {
     return property;
   }
 
-  // @Get("booking")
-  // @RouteResponseBody(BookingDto, {
-  //   isArray: true,
-  // })
-  // @RouteSecurity([{ "Jwt Token": [] }])
-  // async getBookings(
-  //   @Request() request: Express.Request & { id: string }
-  // ): Promise<Booking[]> {
-  //   if (!isUUID(request.id)) {
-  //     throw new CustomHttpException(400, "Invalid merchant id");
-  //   }
+  @Get("booking")
+  @RouteResponseBody(GetUserBookingsDto, {
+    isArray: true,
+  })
+  @RouteSecurity([{ "Jwt Token": [] }])
+  async getBookings(
+    @Request() request: Express.Request & { id: string }
+  ): Promise<GetUserBookingsDto[]> {
+    if (!isUUID(request.id)) {
+      throw new CustomHttpException(400, "Invalid merchant id");
+    }
 
-  //   const bookings = await this.merchantService.getBookings(request.id);
-  //   return bookings;
-  // }
+    const bookings = await this.merchantService.getBookings(request.id);
+    return bookings;
+  }
 }

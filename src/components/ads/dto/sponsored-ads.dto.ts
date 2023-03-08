@@ -6,7 +6,7 @@ import {
   IsString,
 } from "@amishfaldu/swagger-docs";
 import { SponsoredAdGrade, SponsoredAdTargetedKeywords } from "@prisma/client";
-import { AddLongStayPropertyResponseDto } from "src/components/merchant/dto/add-long-stay-property.dto";
+import { AddLongStayPropertyResponseDto } from "../../../components/merchant/dto/add-long-stay-property.dto";
 
 export class SponsoredAdsResponseDto {
   @IsString()

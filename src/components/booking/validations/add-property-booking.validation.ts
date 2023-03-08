@@ -8,10 +8,10 @@ import {
   isUUID,
   validate,
 } from "class-validator";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import { Request } from "express";
-import { PropertyType } from "src/components/user/validations/get-property.validation";
 import { CustomHttpException } from "../../../common/utils/custom-http-error";
+import { PropertyType } from "../../../components/user/validations/get-property.validation";
 import { AddPropertyBookingDto } from "../dto/add-property-booking.dto";
 
 class PropertyBookingDtoValidation {

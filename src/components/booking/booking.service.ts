@@ -6,17 +6,19 @@ import {
   ShortStayCancellationFine,
   ShortStayProperty,
 } from "@prisma/client";
-import * as dayjs from "dayjs";
-import { CustomHttpException } from "src/common/utils/custom-http-error";
-import { appConfig } from "src/config/application.config";
+import dayjs from "dayjs";
 import Stripe from "stripe";
+import { cleanBookingRecords } from "../../common/utils/common-fucntions";
+import { CustomHttpException } from "../../common/utils/custom-http-error";
 import { prisma } from "../../common/utils/prisma";
+import { appConfig } from "../../config/application.config";
 import { UserService } from "../user/user.service";
 import { PropertyType } from "../user/validations/get-property.validation";
 import {
   AddPropertyBookingDto,
   AddPropertyBookingResponseDto,
 } from "./dto/add-property-booking.dto";
+import { CheckoutSuccessDto } from "./dto/checkout-success.dto";
 
 const stripeClient = new Stripe(appConfig.stripe.apiKey, {
   apiVersion: "2022-11-15",
@@ -81,7 +83,7 @@ export class BookingService {
     const daysToStay = stayEndDate.diff(stayStartDate, "days");
     const totalPrice = (pricePerMonth * daysToStay) / 30;
 
-    await this.cleanBookingRecords();
+    await cleanBookingRecords();
 
     const propertyBooking = await prisma.$transaction(
       async (tx) => {
@@ -157,7 +159,6 @@ export class BookingService {
         return propertyBooking;
       },
       {
-        isolationLevel: "Serializable",
         maxWait: 10000,
         timeout: 10000,
       }
@@ -168,7 +169,7 @@ export class BookingService {
     // Generate checkout session object
     const checkoutSession = await stripeClient.checkout.sessions.create({
       success_url: appConfig.stripe.successUrl,
-      cancel_url: appConfig.stripe.cancelUrl,
+      // cancel_url: appConfig.stripe.cancelUrl,
       currency: "USD",
       expires_at: stripeCheckoutSessionExpireTime.unix(),
       invoice_creation: { enabled: true },
@@ -207,13 +208,38 @@ export class BookingService {
     return { checkoutUrl: checkoutSession.url };
   }
 
+  async paymentAcceptedConfirmation(sessionData: CheckoutSuccessDto) {
+    const checkoutSession = await stripeClient.checkout.sessions.retrieve(
+      sessionData.sessionId
+    );
+    if (checkoutSession.payment_status === "paid") {
+      await prisma.booking.update({
+        where: { id: checkoutSession.metadata.bookingId },
+        data: {
+          status: "COMPLETED",
+        },
+      });
+      return { success: true };
+    }
+
+    await prisma.booking.deleteMany({
+      where: {
+        stripeCheckoutSessionId: sessionData.sessionId,
+        status: {
+          not: "COMPLETED",
+        },
+      },
+    });
+    return { success: false };
+  }
+
   /**
    * Get user's property bookings
    * @param id - user's id
    * @returns property booking details
    */
   async getBookings(id: string): Promise<Booking[]> {
-    await this.cleanBookingRecords();
+    await cleanBookingRecords();
 
     const property: Booking[] = await prisma.booking.findMany({
       where: {
@@ -345,33 +371,5 @@ export class BookingService {
     );
 
     return cancelledBooking;
-  }
-
-  /**
-   * Clean booking records from database
-   * which were created due to state inconsistencies
-   */
-  async cleanBookingRecords() {
-    // Remove all the reserved bookings for which payment is not completed
-    const currentDate = dayjs()
-      .set("hours", 0)
-      .set("minutes", 0)
-      .set("seconds", 0)
-      .set("milliseconds", 0);
-
-    await prisma.booking.deleteMany({
-      where: {
-        OR: [
-          {
-            createdAt: { lt: currentDate.add(32, "minutes").toDate() },
-            status: BookingStatus.INPROGRESS,
-          },
-          {
-            status: BookingStatus.INPROGRESS,
-            stripeCheckoutSessionId: null,
-          },
-        ],
-      },
-    });
   }
 }

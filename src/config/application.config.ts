@@ -39,6 +39,5 @@ export const appConfig = {
   stripe: {
     apiKey: process.env.STRIPE_API_KEY,
     successUrl: process.env.STRIPE_SUCCESS_URL,
-    cancelUrl: process.env.STRIPE_CANCEL_URL,
   },
 };

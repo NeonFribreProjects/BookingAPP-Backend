@@ -14,13 +14,17 @@ import {
   RouteTag,
 } from "@amishfaldu/swagger-docs";
 import * as express from "express";
-import { authMiddleware } from "src/common/middlewares/auth.middleware";
+import { authMiddleware } from "../../common/middlewares/auth.middleware";
 import { validationMiddleware } from "../../common/middlewares/validator.middleware";
 import { BookingService } from "./booking.service";
 import {
   AddPropertyBookingDto,
   AddPropertyBookingResponseDto,
 } from "./dto/add-property-booking.dto";
+import {
+  CheckoutSuccessDto,
+  CheckoutSuccessResponseDto,
+} from "./dto/checkout-success.dto";
 import { GetUserBookingsDto } from "./dto/get-user-booking.dto";
 import { validateAddPropertyBookingRequest } from "./validations/add-property-booking.validation";
 import { validateCancelUserBookingsRequest } from "./validations/cancel-booking.validation";
@@ -48,7 +52,7 @@ export class BookingController {
   ])
   @RouteRequestBody(AddPropertyBookingDto)
   @RouteResponseBody(AddPropertyBookingResponseDto)
-  async registerMerchant(
+  async bookPorperty(
     @Request() request: express.Request & { id: string },
     @Response() response: express.Response,
     @Body() bookingDetails: AddPropertyBookingDto
@@ -58,6 +62,29 @@ export class BookingController {
       bookingDetails
     );
     response.redirect(bookingResult.checkoutUrl);
+    return bookingResult;
+  }
+
+  @Post("confirm-payment")
+  @RouteMiddleware([
+    authMiddleware,
+    (req, res, next) => {
+      return validationMiddleware(
+        req,
+        res,
+        next,
+        validateAddPropertyBookingRequest
+      );
+    },
+  ])
+  @RouteRequestBody(CheckoutSuccessDto)
+  @RouteResponseBody(CheckoutSuccessResponseDto)
+  async confirmPaymentAccepted(
+    @Body() sessionData: CheckoutSuccessDto
+  ): Promise<CheckoutSuccessResponseDto> {
+    const bookingResult = await this.bookingService.paymentAcceptedConfirmation(
+      sessionData
+    );
     return bookingResult;
   }
 

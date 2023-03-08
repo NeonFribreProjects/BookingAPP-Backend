@@ -1,4 +1,5 @@
 import {
+  Booking,
   LongStayProperty,
   Merchant,
   Prisma,
@@ -226,17 +227,17 @@ export class MerchantService {
     return property;
   }
 
-  // /**
-  //  * Get merchant's property bookings
-  //  * @param id - merchant's id
-  //  * @returns property booking details
-  //  */
-  // async getBookings(id: string): Promise<Booking[]> {
-  //   const property: Booking[] = await prisma.booking.findMany({
-  //     where: {
-  //       merchantId: id,
-  //     },
-  //   });
-  //   return property;
-  // }
+  /**
+   * Get merchant's property bookings
+   * @param id - merchant's id
+   * @returns property booking details
+   */
+  async getBookings(id: string): Promise<Booking[]> {
+    const property: Booking[] = await prisma.booking.findMany({
+      where: {
+        merchantId: id,
+      },
+    });
+    return property;
+  }
 }

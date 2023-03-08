@@ -10,19 +10,17 @@ import {
 } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 import { PASSWORD_HASH_ROUNDS } from "../../common/constants/app.constant";
+import { cleanBookingRecords } from "../../common/utils/common-fucntions";
 import { CustomHttpException } from "../../common/utils/custom-http-error";
 import { prisma } from "../../common/utils/prisma";
-import { BookingService } from "../booking/booking.service";
 import { JWTService } from "../jwt/jwt.service";
 import { PropertyType } from "./validations/get-property.validation";
 
 export class UserService {
   private jwtService: JWTService;
-  private bookingService: BookingService;
 
   constructor() {
     this.jwtService = new JWTService();
-    this.bookingService = new BookingService();
   }
 
   /**
@@ -142,7 +140,7 @@ export class UserService {
     pagination: { skip: number; limit: number }
   ): Promise<ShortStayProperty[] | LongStayProperty[]> {
     // clean up in-consistent booking records
-    await this.bookingService.cleanBookingRecords();
+    await cleanBookingRecords();
 
     let property: LongStayProperty[] | ShortStayProperty[] = [];
 
