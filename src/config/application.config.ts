@@ -40,4 +40,11 @@ export const appConfig = {
     apiKey: process.env.STRIPE_API_KEY,
     successUrl: process.env.STRIPE_SUCCESS_URL,
   },
+
+  aws: {
+    accessKey: process.env.AWS_ACCESS_KEY,
+    secretKey: process.env.AWS_SECRET_KEY,
+    region: process.env.AWS_REGION,
+    bucketName: process.env.AWS_S3_BUCKET_NAME,
+  },
 };

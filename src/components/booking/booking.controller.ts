@@ -52,6 +52,7 @@ export class BookingController {
   ])
   @RouteRequestBody(AddPropertyBookingDto)
   @RouteResponseBody(AddPropertyBookingResponseDto)
+  @RouteSecurity([{ "Jwt Token": [] }])
   async bookPorperty(
     @Request() request: express.Request & { id: string },
     @Response() response: express.Response,
@@ -66,17 +67,6 @@ export class BookingController {
   }
 
   @Post("confirm-payment")
-  @RouteMiddleware([
-    authMiddleware,
-    (req, res, next) => {
-      return validationMiddleware(
-        req,
-        res,
-        next,
-        validateAddPropertyBookingRequest
-      );
-    },
-  ])
   @RouteRequestBody(CheckoutSuccessDto)
   @RouteResponseBody(CheckoutSuccessResponseDto)
   async confirmPaymentAccepted(

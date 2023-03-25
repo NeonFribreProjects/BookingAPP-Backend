@@ -11,4 +11,9 @@ export const validationSchema = joi.object({
 
   STRIPE_API_KEY: joi.string().required(),
   STRIPE_SUCCESS_URL: joi.string().required(),
+
+  AWS_ACCESS_KEY: joi.string().required(),
+  AWS_SECRET_KEY: joi.string().required(),
+  AWS_REGION: joi.string().required(),
+  AWS_S3_BUCKET_NAME: joi.string().required(),
 });
