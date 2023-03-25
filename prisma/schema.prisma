@@ -1,0 +1,377 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Merchant {
+  id                 String @id @default(uuid()) @db.Uuid
+  name               String
+  languagePreference String
+
+  // Credentials
+  email    String @unique
+  password String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  shortStayProperty ShortStayProperty[]
+  longStayProperty  LongStayProperty[]
+  booking           Booking[]
+}
+
+enum ShortStayPropertyType {
+  Hotel
+  Apartment
+}
+
+model Review {
+  id          String   @id @default(uuid()) @db.Uuid
+  rating      Float
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  shortStayProperty   ShortStayProperty @relation(fields: [shortStayPropertyId], references: [id])
+  shortStayPropertyId String            @db.Uuid
+  longStayProperty    LongStayProperty? @relation(fields: [longStayPropertyId], references: [id])
+  longStayPropertyId  String?           @db.Uuid
+}
+
+enum SmokingPolicy {
+  Smoking
+  NoSmoking
+}
+
+enum ShortStayPropertyBedOptions {
+  SingleBed
+  DoubleBed
+  LargeBed
+  ExtraLargeDoubleBed
+  BunkBed
+  SofaBed
+  FutonMat
+}
+
+enum ShortStayBreakfastOptions {
+  Included
+  NotIncluded
+}
+
+enum AvailableFacilities {
+  FreeWiFi
+  Restaurants
+  RoomService
+  Bar
+  TwentyFourHourFrontDesk
+  Sauna
+  FitnessCentre
+  Garden
+  Terrace
+  NonSmokingRooms
+  AirportShuttle
+  FamilyRooms
+  SpaAndWellnessCentre
+  HotTubOrJacuzzi
+  AirConditioning
+  WaterPark
+  SwimmingPool
+}
+
+enum ShortStayAmenities {
+  AirConditioning
+  Bath
+  SpaBath
+  FlatScreenTV
+  ElectricKettle
+  BalconyView
+  Terrece
+}
+
+enum ShortStayCancellation {
+  NonRefundable
+  OneDayBeforeArrival
+  TwoDaysBeforeArrival
+  CancelUntillDayOfArrival
+}
+
+enum ShortStayCancellationFine {
+  FirstNightPrice
+  FullStayPrice
+}
+
+model ShortStayProperty {
+  id           String                @id @default(uuid()) @db.Uuid
+  name         String
+  description  String
+  propertyType ShortStayPropertyType
+  starRating   Float?
+
+  // Location
+  streetAddress String
+  addressLine2  String?
+  country       String
+  city          String
+  postCode      String
+
+  // Contact details
+  contactName                   String
+  contactPhoneNumber            String
+  contactAlternativePhoneNumber String?
+
+  // Layout and details
+  roomName              String
+  customName            String
+  roomType              String
+  smokingPolicy         SmokingPolicy
+  numberOfRooms         Int
+  bedOptions            ShortStayPropertyBedOptions
+  numberOfGuestsAllowed Int
+  roomSize              Float
+  parking               Boolean
+  breakfast             ShortStayBreakfastOptions
+  languagesSpoken       String[]
+  availableFacilities   AvailableFacilities[]
+  extraBedOption        Boolean
+  amenities             ShortStayAmenities[]
+  pictures              String[]
+  checkInTime           String
+  checkOutTime          String
+  children              Boolean
+  pets                  Boolean
+  creditCard            Boolean
+  commissionPercentage  Float
+
+  // Pricing
+  pricePerMonth    Float
+  discountedPrice  Float?
+  cancellation     ShortStayCancellation
+  cancellationFine ShortStayCancellationFine
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  merchant   Merchant @relation(fields: [merchantId], references: [id])
+  merchantId String   @db.Uuid
+
+  reviewScore Float     @default(0)
+  review      Review[]
+  booking     Booking[]
+}
+
+enum LongStayPropertyType {
+  House
+  Apartment
+  Studio
+  Room
+}
+
+enum LongStayPropertyRoomType {
+  SingleRoom
+  DoubleRoom
+  Ensuite
+}
+
+enum LongStayPropertyAvailability {
+  Immediately
+  SpecificDay
+  Month
+}
+
+enum LongStayPropertyLeaseOptions {
+  MinimumSixMonths
+  SpecificNumberOfMonths
+}
+
+enum LongStayAmenities {
+  AirConditioning
+  Bath
+  SpaBath
+  FlatScreenTV
+  ElectricKettle
+  BalconyView
+  Terrece
+  Cooker
+  MicroWave
+  Fridge
+}
+
+model LongStayProperty {
+  id          String @id @default(uuid()) @db.Uuid
+  name        String
+  description String
+
+  // Location
+  streetAddress String
+  addressLine2  String?
+  country       String
+  city          String
+  postCode      String
+
+  // Contact details
+  contactName                   String
+  contactPhoneNumber            String
+  contactAlternativePhoneNumber String?
+
+  // Layout and details
+  propertyType        LongStayPropertyType
+  // House and apartment have atleast 1 room
+  numberOfRooms       Int
+  roomType            LongStayPropertyRoomType
+  numberOfBathrooms   Int                          @default(1)
+  availability        LongStayPropertyAvailability
+  furnished           Boolean
+  lease               LongStayPropertyLeaseOptions
+  pictures            String[]
+  parking             Boolean
+  availableFacilities AvailableFacilities[]
+  amenities           LongStayAmenities[]
+
+  // Pricing
+  pricePerMonth    Float
+  discountedPrice  Float?
+  cancellation     ShortStayCancellation
+  cancellationFine ShortStayCancellationFine
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  merchant   Merchant @relation(fields: [merchantId], references: [id])
+  merchantId String   @db.Uuid
+
+  reviewScore Float         @default(0)
+  review      Review[]
+  sponsoredAd SponsoredAd[]
+  booking     Booking[]
+}
+
+model InterstitialAd {
+  id               String   @id @default(uuid()) @db.Uuid
+  title            String
+  description      String
+  image            String
+  link             String
+  startDate        DateTime
+  endDate          DateTime
+  targetLocation   String
+  targetSegment    String
+  displayFrequency Int
+  views            Int
+  clicks           Int
+  conversions      Int
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+enum SponsoredAdTargetedKeywords {
+  description
+  country
+  city
+  postcode
+  numberOfRooms
+  roomType
+  numberOfBathrooms
+  availability
+  furnished
+  lease
+  parking
+  availableFacilities
+  amenities
+  discountedPrice
+  cancellation
+  cancellationFine
+}
+
+enum SponsoredAdGrade {
+  A
+  B
+  C
+  D
+  E
+  F
+}
+
+model SponsoredAd {
+  id             String                        @id @default(uuid()) @db.Uuid
+  startDate      DateTime
+  endDate        DateTime
+  targetLocation String
+  targetKeywords SponsoredAdTargetedKeywords[]
+  grade          SponsoredAdGrade
+  views          Int
+  clicks         Int
+  conversions    Int
+  createdAt      DateTime                      @default(now())
+  updatedAt      DateTime                      @updatedAt
+
+  longStayProperty   LongStayProperty @relation(fields: [longStayPropertyId], references: [id])
+  longStayPropertyId String           @db.Uuid
+}
+
+enum Gender {
+  Male
+  Female
+  Other
+}
+
+enum SmokingPreference {
+  None
+  NonSmoking
+  Smoking
+}
+
+model User {
+  id                  String            @id @default(uuid()) @db.Uuid
+  firstName           String
+  lastName            String
+  email               String            @unique
+  password            String
+  mobileNumber        String
+  dob                 DateTime?
+  gender              Gender?
+  smokingPreference   SmokingPreference @default(None)
+  address             String?
+  lastSearchedCity    String?
+  lastSearchedCountry String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  booking             Booking[]
+}
+
+enum BookingStatus {
+  INPROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Booking {
+  id                          String        @id @default(uuid()) @db.Uuid
+  stayStartDate               DateTime
+  stayEndDate                 DateTime
+  pricePerMonth               Float
+  totalPrice                  Float
+  status                      BookingStatus @default(INPROGRESS)
+  stripeCheckoutSessionId     String?
+  stripeCheckoutPaymentIntent String?
+  createdAt                   DateTime      @default(now())
+  updatedAt                   DateTime      @updatedAt
+
+  longStayProperty   LongStayProperty? @relation(fields: [longStayPropertyId], references: [id])
+  longStayPropertyId String?           @db.Uuid
+
+  shortStayProperty   ShortStayProperty? @relation(fields: [shortStayPropertyId], references: [id])
+  shortStayPropertyId String?            @db.Uuid
+
+  merchant   Merchant @relation(fields: [merchantId], references: [id])
+  merchantId String   @db.Uuid
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @db.Uuid
+}

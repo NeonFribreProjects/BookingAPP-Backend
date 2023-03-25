@@ -1,5 +1,5 @@
-import { promisify } from "util";
 import * as jwt from "jsonwebtoken";
+import { promisify } from "util";
 
 /**
  * Promisified version of jwt.verify method
@@ -10,5 +10,6 @@ import * as jwt from "jsonwebtoken";
 export const jwtVerifyPromisified = promisify<
   string,
   jwt.Secret,
-  jwt.VerifyOptions
+  jwt.VerifyOptions,
+  jwt.Jwt
 >(jwt.verify);

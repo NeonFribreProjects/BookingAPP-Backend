@@ -12,8 +12,18 @@ export class CustomHttpException {
    */
   message: string;
 
-  constructor(statuscode: number, message: string) {
+  /**
+   * @property extraData - Extra data to send to http response
+   */
+  extraData: Record<string, any>;
+
+  constructor(
+    statuscode: number,
+    message: string,
+    extraData: Record<string, any> = {}
+  ) {
     this.statuscode = statuscode;
     this.message = message;
+    this.extraData = extraData;
   }
 }

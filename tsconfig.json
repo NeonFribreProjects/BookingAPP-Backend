@@ -2,7 +2,6 @@
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,
-    "allowSyntheticDefaultImports": true,
     "target": "es2017",
     "sourceMap": true,
     "outDir": "./dist",
@@ -16,7 +15,8 @@
     "noFallthroughCasesInSwitch": false,
     "pretty": true,
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "esModuleInterop": true,
   },
   "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
 }
