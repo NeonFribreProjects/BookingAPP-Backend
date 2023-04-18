@@ -130,7 +130,7 @@ class ShortStayPropertyDtoValidation {
   commissionPercentage: number;
 
   @IsNumber()
-  pricePerPerson: number;
+  pricePerMonth: number;
 
   @IsEnum(ShortStayCancellation)
   cancellation: ShortStayCancellation;

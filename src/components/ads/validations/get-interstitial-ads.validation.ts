@@ -1,14 +1,14 @@
-import { IsNumber, IsString, isUUID, validate } from "class-validator";
+import { IsNumber, IsNumberString, IsString, isUUID, validate } from "class-validator";
 import { Request } from "express";
 import { CustomHttpException } from "../../../common/utils/custom-http-error";
 import { plainToInstance } from "class-transformer";
 
 class GetInterstitialAdsRequest {
-  @IsNumber()
-  skip: number;
+  @IsNumberString()
+  skip: string;
 
-  @IsNumber()
-  limit: number;
+  @IsNumberString()
+  limit: string;
 
   @IsString()
   city: string;

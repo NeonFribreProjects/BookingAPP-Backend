@@ -9,12 +9,15 @@ import {
   SmokingPreference,
 } from "@prisma/client";
 import * as bcrypt from "bcrypt";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import { PASSWORD_HASH_ROUNDS } from "../../common/constants/app.constant";
 import { cleanBookingRecords } from "../../common/utils/common-fucntions";
 import { CustomHttpException } from "../../common/utils/custom-http-error";
 import { prisma } from "../../common/utils/prisma";
 import { JWTService } from "../jwt/jwt.service";
 import { PropertyType } from "./validations/get-property.validation";
+dayjs.extend(utc);
 
 export class UserService {
   private jwtService: JWTService;
@@ -176,12 +179,12 @@ export class UserService {
                   OR: [
                     {
                       stayStartDate: {
-                        lt: propertyDetails.startDate,
+                        lt: dayjs.utc(propertyDetails.startDate).toDate(),
                       },
                     },
                     {
                       stayStartDate: {
-                        lt: propertyDetails.endDate,
+                        lt: dayjs.utc(propertyDetails.endDate).toDate(),
                       },
                     },
                   ],
@@ -190,12 +193,12 @@ export class UserService {
                   OR: [
                     {
                       stayEndDate: {
-                        gt: propertyDetails.startDate,
+                        gt: dayjs.utc(propertyDetails.startDate).toDate(),
                       },
                     },
                     {
                       stayEndDate: {
-                        gt: propertyDetails.endDate,
+                        gt: dayjs.utc(propertyDetails.endDate).toDate(),
                       },
                     },
                   ],

@@ -35,16 +35,18 @@ export class AdsService {
           {
             targetLocation: {
               contains: searchCity,
+              mode: "insensitive",
             },
           },
           {
             targetLocation: {
               contains: searchCountry,
+              mode: "insensitive",
             },
           },
         ],
-        startDate: { gte: currentDate },
-        endDate: { lte: currentDate },
+        startDate: { lte: currentDate },
+        endDate: { gte: currentDate },
       },
       take: paginationParams.limit,
       skip: paginationParams.skip,
@@ -70,37 +72,54 @@ export class AdsService {
     const currentDate = dayjs.utc().toISOString();
     const sponsoredAds = await prisma.sponsoredAd.findMany({
       where: {
-        startDate: { gte: currentDate },
-        endDate: { lte: currentDate },
-        targetKeywords: {
-          hasSome: Object.keys(keywords) as any[],
-        },
+        startDate: { lte: currentDate },
+        endDate: { gte: currentDate },
+        targetKeywords: Object.keys(keywords).length
+          ? {
+              hasSome: Object.keys(keywords) as any[],
+            }
+          : undefined,
       },
       orderBy: { grade: "asc" },
       take: paginationParams.limit,
       skip: paginationParams.skip,
     });
 
+    console.log("Sponsored ads: ", sponsoredAds);
     const adsToShow = await Promise.all(
-      sponsoredAds.map((sponsoredAd) =>
-        prisma.sponsoredAd.findFirst({
+      sponsoredAds.map((sponsoredAd) => {
+        const longStayPropertyParams = sponsoredAd.targetKeywords.reduce(
+          (properties, keyword) => {
+            if (
+              keywords[keyword] !== undefined ||
+              (Array.isArray(keywords[keyword]) && !keywords[keyword]?.length)
+            ) {
+              return properties;
+            }
+
+            properties.OR.push({ [keyword]: keywords[keyword] });
+            if (keyword === "amenities" || keyword === "availableFacilities") {
+              properties.OR.push({
+                [keyword]: { hasSome: keywords[keyword] },
+              });
+            }
+            return properties;
+          },
+          { OR: [] }
+        );
+        console.log("Property filter: ",sponsoredAd.targetKeywords, longStayPropertyParams);
+
+        return prisma.sponsoredAd.findFirst({
           where: {
             id: sponsoredAd.id,
-            longStayProperty: sponsoredAd.targetKeywords.reduce(
-              (properties, keyword) => {
-                properties.OR.push({ [keyword]: keywords[keyword] });
-                properties.OR.push({ [keyword]: { hasSome: keywords[keyword] } });
-                return properties;
-              },
-              { OR: [] }
-            ),
+            longStayProperty: longStayPropertyParams,
           },
           include: {
             longStayProperty: true,
           },
-        })
-      )
+        });
+      })
     );
-    return adsToShow;
+    return adsToShow.filter((ad) => ad);
   }
 }

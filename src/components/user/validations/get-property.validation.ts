@@ -1,10 +1,9 @@
 import { ShortStayPropertyBedOptions } from "@prisma/client";
 import { plainToInstance } from "class-transformer";
 import {
-  IsBoolean,
+  IsBooleanString,
   IsDateString,
   IsEnum,
-  IsNumber,
   IsNumberString,
   IsOptional,
   IsString,
@@ -38,25 +37,25 @@ class GetPropertyValidation {
   @IsOptional()
   endDate: string;
 
-  @IsNumber()
+  @IsNumberString()
   @IsOptional()
-  rooms: number;
+  rooms: string;
 
-  @IsNumber()
+  @IsNumberString()
   @IsOptional()
-  guests: number;
+  guests: string;
 
-  @IsBoolean()
+  @IsBooleanString()
   @IsOptional()
-  children: boolean;
+  children: string;
 
-  @IsNumber()
+  @IsNumberString()
   @IsOptional()
-  minPrice: number;
+  minPrice: string;
 
-  @IsNumber()
+  @IsNumberString()
   @IsOptional()
-  maxPrice: number;
+  maxPrice: string;
 
   // comma separated facilities
   @IsString()
@@ -72,13 +71,13 @@ class GetPropertyValidation {
   @IsOptional()
   bedPreference: ShortStayPropertyBedOptions;
 
-  @IsNumber()
+  @IsNumberString()
   @IsOptional()
-  star: number;
+  star: string;
 
-  @IsNumber()
+  @IsNumberString()
   @IsOptional()
-  reviewScore: number;
+  reviewScore: string;
 
   @IsString()
   @IsOptional()
