@@ -18,7 +18,6 @@ import { validateGetSponsoredAdsRequest } from "./validations/get-sponsored-ads.
 
 @Controller({ route: "ads" })
 @RouteTag("Ads")
-@RouteMiddleware([authMiddleware])
 export class AdsController {
   adsService: AdsService;
   constructor() {
@@ -27,6 +26,7 @@ export class AdsController {
 
   @Get("interstitial-ads")
   @RouteMiddleware([
+    authMiddleware,
     (req, res, next) => {
       return validationMiddleware(
         req,
@@ -56,6 +56,7 @@ export class AdsController {
 
   @Get("sponsored-ads")
   @RouteMiddleware([
+    authMiddleware,
     (req, res, next) => {
       return validationMiddleware(
         req,

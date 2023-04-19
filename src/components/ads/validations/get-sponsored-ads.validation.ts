@@ -1,5 +1,6 @@
 import {
   IsNumber,
+  IsNumberString,
   IsObject,
   IsString,
   isUUID,
@@ -11,14 +12,14 @@ import { plainToInstance } from "class-transformer";
 import { SponsoredAdTargetedKeywords } from "@prisma/client";
 
 class GetSponsoredAdsRequest {
-  @IsNumber()
-  skip: number;
+  @IsNumberString()
+  skip: string;
 
-  @IsNumber()
-  limit: number;
+  @IsNumberString()
+  limit: string;
 
-  @IsObject()
-  keywords: Map<SponsoredAdTargetedKeywords, any>;
+  @IsString()
+  keywords: string;
 }
 
 export async function validateGetSponsoredAdsRequest(

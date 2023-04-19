@@ -16,26 +16,27 @@ import { AddPropertyBookingDto } from "../dto/add-property-booking.dto";
 
 class PropertyBookingDtoValidation {
   @IsDateString()
-  @MinDate(() =>
-    dayjs()
-      .set("hours", 0)
-      .set("minutes", 0)
-      .set("seconds", 0)
-      .set("milliseconds", 0)
-      .toDate()
-  )
+  // @MinDate(() => {
+  //   console.log("here");
+  //   return dayjs()
+  //     .set("hours", 0)
+  //     .set("minutes", 0)
+  //     .set("seconds", 0)
+  //     .set("milliseconds", 0)
+  //     .toDate();
+  // })
   stayStartDate: string;
 
   @IsDateString()
-  @MinDate(() =>
-    dayjs()
-      .add(1, "day")
-      .set("hours", 0)
-      .set("minutes", 0)
-      .set("seconds", 0)
-      .set("milliseconds", 0)
-      .toDate()
-  )
+  // @MinDate(() =>
+  //   dayjs()
+  //     .add(1, "day")
+  //     .set("hours", 0)
+  //     .set("minutes", 0)
+  //     .set("seconds", 0)
+  //     .set("milliseconds", 0)
+  //     .toDate()
+  // )
   @ValidateIf((body: AddPropertyBookingDto) =>
     dayjs(body.stayEndDate)
       .set("hours", 0)

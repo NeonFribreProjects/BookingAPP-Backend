@@ -4,9 +4,9 @@ import {
   LongStayPropertyAvailability,
   LongStayPropertyLeaseOptions,
   LongStayPropertyRoomType,
+  LongStayPropertyType,
   ShortStayCancellation,
   ShortStayCancellationFine,
-  ShortStayPropertyType,
 } from "@prisma/client";
 import { plainToInstance } from "class-transformer";
 import {
@@ -52,8 +52,8 @@ class LongStayPropertyDtoValidation {
   @IsOptional()
   contactAlternativePhoneNumber: string | null;
 
-  @IsEnum(ShortStayPropertyType)
-  propertyType: ShortStayPropertyType;
+  @IsEnum(LongStayPropertyType)
+  propertyType: LongStayPropertyType;
 
   @IsNumber()
   numberOfRooms: number;
@@ -71,7 +71,7 @@ class LongStayPropertyDtoValidation {
   furnished: boolean;
 
   @IsEnum(LongStayPropertyLeaseOptions)
-  Lease: LongStayPropertyLeaseOptions;
+  lease: LongStayPropertyLeaseOptions;
 
   @IsArray()
   @IsString({ each: true })

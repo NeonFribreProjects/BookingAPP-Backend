@@ -190,6 +190,7 @@ export class MerchantController {
   }
 
   @Get("booking")
+  @RouteMiddleware([authMiddleware])
   @RouteResponseBody(GetUserBookingsDto, {
     isArray: true,
   })

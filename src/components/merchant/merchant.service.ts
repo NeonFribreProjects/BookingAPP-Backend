@@ -132,6 +132,10 @@ export class MerchantService {
       updateData.name = merchantDetails.name;
     }
 
+    if (merchantDetails.languagePreference) {
+      updateData.languagePreference = merchantDetails.languagePreference;
+    }
+
     const merchant = await prisma.merchant.update({
       where: { id },
       data: updateData,

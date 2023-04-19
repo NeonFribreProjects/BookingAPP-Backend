@@ -81,7 +81,10 @@ export class BookingService {
       .set("milliseconds", 0);
 
     const daysToStay = stayEndDate.diff(stayStartDate, "days");
-    const totalPrice = (pricePerMonth * daysToStay) / 30;
+    const totalPrice = parseFloat(
+      ((pricePerMonth * daysToStay) / 30).toFixed(2)
+    );
+    console.log(`${totalPrice}`);
 
     await cleanBookingRecords();
 
@@ -176,6 +179,7 @@ export class BookingService {
       line_items: [
         {
           adjustable_quantity: { enabled: false },
+          quantity: 1,
           price_data: {
             currency: "USD",
             product_data: {
@@ -183,7 +187,7 @@ export class BookingService {
               description: property.description,
               images: property.pictures.slice(0, 8),
             },
-            unit_amount_decimal: `${totalPrice}`,
+            unit_amount_decimal: `${totalPrice * 100}`,
           },
         },
       ],
@@ -194,14 +198,15 @@ export class BookingService {
       submit_type: "book",
       payment_intent_data: {
         receipt_email: user.email,
+        capture_method: "automatic",
       },
     });
+    console.log("Checkout session: ", checkoutSession);
 
     await prisma.booking.update({
       where: { id: propertyBooking.id },
       data: {
         stripeCheckoutSessionId: checkoutSession.id,
-        stripeCheckoutPaymentIntent: checkoutSession.payment_intent.toString(),
       },
     });
 
@@ -217,6 +222,8 @@ export class BookingService {
         where: { id: checkoutSession.metadata.bookingId },
         data: {
           status: "COMPLETED",
+          stripeCheckoutPaymentIntent:
+            checkoutSession.payment_intent.toString(),
         },
       });
       return { success: true };
