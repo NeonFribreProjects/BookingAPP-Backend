@@ -347,7 +347,7 @@ export class BookingService {
       },
     });
 
-    if (!booking.id) {
+    if (!booking?.id) {
       throw new CustomHttpException(400, "Invalid booking id");
     }
 
