@@ -62,7 +62,6 @@ export class BookingController {
       request.id,
       bookingDetails
     );
-    response.redirect(bookingResult.checkoutUrl);
     return bookingResult;
   }
 

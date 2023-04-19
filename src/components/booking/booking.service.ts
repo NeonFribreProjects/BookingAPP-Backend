@@ -198,7 +198,6 @@ export class BookingService {
       submit_type: "book",
       payment_intent_data: {
         receipt_email: user.email,
-        // application_fee_amount: totalPrice,
         capture_method: "automatic",
       },
     });
@@ -208,7 +207,6 @@ export class BookingService {
       where: { id: propertyBooking.id },
       data: {
         stripeCheckoutSessionId: checkoutSession.id,
-        stripeCheckoutPaymentIntent: checkoutSession.payment_intent.toString(),
       },
     });
 
@@ -224,6 +222,8 @@ export class BookingService {
         where: { id: checkoutSession.metadata.bookingId },
         data: {
           status: "COMPLETED",
+          stripeCheckoutPaymentIntent:
+            checkoutSession.payment_intent.toString(),
         },
       });
       return { success: true };
