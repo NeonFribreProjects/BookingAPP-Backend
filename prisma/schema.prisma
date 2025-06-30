@@ -375,3 +375,129 @@ model Booking {
   user   User   @relation(fields: [userId], references: [id])
   userId String @db.Uuid
 }
+
+model LongStayBlockedDate {
+  id          String   @id @default(uuid()) @db.Uuid
+  property    LongStayProperty @relation(fields: [propertyId], references: [id])
+  propertyId  String   @db.Uuid
+  startDate   DateTime
+  endDate     DateTime
+  reason      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model LongStayPricing {
+  id          String   @id @default(uuid()) @db.Uuid
+  property    LongStayProperty @relation(fields: [propertyId], references: [id])
+  propertyId  String   @db.Uuid
+  startDate   DateTime
+  endDate     DateTime
+  pricePerMonth Float
+  minStayMonths Int?
+  discountPercent Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum UtilityType {
+  Electricity
+  Water
+  Gas
+  Internet
+  TV
+  Trash
+  Other
+}
+
+model LongStayUtility {
+  id          String   @id @default(uuid()) @db.Uuid
+  property    LongStayProperty @relation(fields: [propertyId], references: [id])
+  propertyId  String   @db.Uuid
+  type        UtilityType
+  included    Boolean
+  notes       String?
+}
+
+model PropertyDocument {
+  id          String   @id @default(uuid()) @db.Uuid
+  property    LongStayProperty @relation(fields: [propertyId], references: [id])
+  propertyId  String   @db.Uuid
+  url         String
+  type        String
+  uploadedAt  DateTime @default(now())
+  description String?
+}
+
+model RentalApplication {
+  id          String   @id @default(uuid()) @db.Uuid
+  property    LongStayProperty @relation(fields: [propertyId], references: [id])
+  propertyId  String   @db.Uuid
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String   @db.Uuid
+  status      ApplicationStatus @default(PENDING)
+  message     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model MaintenanceRequest {
+  id          String   @id @default(uuid()) @db.Uuid
+  property    LongStayProperty @relation(fields: [propertyId], references: [id])
+  propertyId  String   @db.Uuid
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String   @db.Uuid
+  description String
+  status      MaintenanceStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum MaintenanceStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+}
+
+model LeaseAgreement {
+  id          String   @id @default(uuid()) @db.Uuid
+  property    LongStayProperty @relation(fields: [propertyId], references: [id])
+  propertyId  String   @db.Uuid
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String   @db.Uuid
+  startDate   DateTime
+  endDate     DateTime
+  documentUrl String
+  signedAt    DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model RentPayment {
+  id          String   @id @default(uuid()) @db.Uuid
+  lease       LeaseAgreement @relation(fields: [leaseId], references: [id])
+  leaseId     String   @db.Uuid
+  amount      Float
+  dueDate     DateTime
+  paidDate    DateTime?
+  status      PaymentStatus @default(PENDING)
+  method      String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  LATE
+  FAILED
+}
