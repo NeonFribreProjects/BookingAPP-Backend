@@ -8,7 +8,7 @@ services:
     networks:
       - booking-network
     ports:
-      - "5432:5432"
+      - "5434:5432"
     environment:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
@@ -23,7 +23,7 @@ services:
     depends_on:
       - database
     ports:
-      - 3000:3000
+      - 3001:3000
     networks:
       - booking-network
 
