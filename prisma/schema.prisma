@@ -164,6 +164,13 @@ model ShortStayProperty {
   reviewScore Float     @default(0)
   review      Review[]
   booking     Booking[]
+  //blockedDates        LongStayBlockedDate[]
+  //pricing             LongStayPricing[]
+  //utilities           LongStayUtility[]
+  //documents           PropertyDocument[]
+  //rentalApplications  RentalApplication[]
+  //maintenanceRequests MaintenanceRequest[]
+  //leaseAgreements     LeaseAgreement[]
 }
 
 enum LongStayPropertyType {
@@ -250,6 +257,13 @@ model LongStayProperty {
   review      Review[]
   sponsoredAd SponsoredAd[]
   booking     Booking[]
+  blockedDates        LongStayBlockedDate[]
+  pricing             LongStayPricing[]
+  utilities           LongStayUtility[]
+  documents           PropertyDocument[]
+  rentalApplications  RentalApplication[]
+  maintenanceRequests MaintenanceRequest[]
+  leaseAgreements     LeaseAgreement[]
 }
 
 model InterstitialAd {
@@ -343,6 +357,9 @@ model User {
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
   booking             Booking[]
+  rentalApplications  RentalApplication[]
+  maintenanceRequests MaintenanceRequest[]
+  leaseAgreements     LeaseAgreement[]
 }
 
 enum BookingStatus {
@@ -479,6 +496,7 @@ model LeaseAgreement {
   signedAt    DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  rentPayments RentPayment[]
 }
 
 model RentPayment {
