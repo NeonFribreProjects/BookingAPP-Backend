@@ -48,3 +48,11 @@ export const appConfig = {
     bucketName: process.env.AWS_S3_BUCKET_NAME,
   },
 };
+
+
+export const corsConfig = {
+  allowedOrigins: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : [
+    "https://stay2easy.com",
+    "https://www.stay2easy.com"
+  ],
+};

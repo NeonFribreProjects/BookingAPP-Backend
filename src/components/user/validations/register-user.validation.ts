@@ -16,11 +16,7 @@ export class RegisterUserDtoValidation {
   @IsEmail()
   email: string;
 
-  @IsString()
-  name: string;
 
-  @IsString()
-  languagePreference: string;
 
   @IsString()
   password: string;

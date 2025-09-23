@@ -12,12 +12,11 @@ export const app = express();
 
 
 // ✅ Enable CORS
+import { corsConfig } from "./config/application.config";
+
 app.use(
   cors({
-    origin: [
-      "https://stay2easy.com",
-      "https://www.stay2easy.com"
-    ],
+    origin: corsConfig.allowedOrigins,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     credentials: true,
   })
